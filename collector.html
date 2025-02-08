@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Falling Items Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background-color: #fff;
+            border: 2px solid #000;
+            overflow: hidden;
+        }
+
+        #player {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background-color: #00f;
+            transform: translateX(-50%);
+        }
+
+        .item {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #f00;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="player"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameContainer = document.getElementById('gameContainer');
+            const player = document.getElementById('player');
+            let playerX = gameContainer.clientWidth / 2 - player.clientWidth / 2;
+            const playerSpeed = 10;
+            const itemSpeed = 2;
+            let score = 0;
+
+            // Function to move player
+            function movePlayer() {
+                player.style.left = `${playerX}px`;
+            }
+
+            // Handle keypress events
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'ArrowLeft' && playerX > 0) {
+                    playerX -= playerSpeed;
+                } else if (event.key === 'ArrowRight' && playerX < gameContainer.clientWidth - player.clientWidth) {
+                    playerX += playerSpeed;
+                }
+                movePlayer();
+            });
+
+            // Function to create falling items
+            function createItem() {
+                const item = document.createElement('div');
+                item.classList.add('item');
+                item.style.left = `${Math.random() * (gameContainer.clientWidth - 20)}px`;
+                item.style.top = '0px';
+                gameContainer.appendChild(item);
+                return item;
+            }
+
+            // Function to update item position
+            function updateItems() {
+                const items = document.querySelectorAll('.item');
+                items.forEach(item => {
+                    const itemY = parseInt(item.style.top);
+                    if (itemY > gameContainer.clientHeight) {
+                        item.remove();
+                        score -= 1;
+                        updateScore();
+                    } else if (itemY > gameContainer.clientHeight - player.clientHeight - 10 && 
+                            Math.abs(parseInt(item.style.left) - playerX) < player.clientWidth) {
+                        item.remove();
+                        score += 1;
+                        updateScore();
+                    } else {
+                        item.style.top = `${itemY + itemSpeed}px`;
+                    }
+                });
+            }
+
+            // Function to update score
+            function updateScore() {
+                console.log(`Score: ${score}`);
+            }
+
+            // Game loop
+            function gameLoop() {
+                updateItems();
+                if (Math.random() < 0.02) {
+                    createItem();
+                }
+                requestAnimationFrame(gameLoop);
+            }
+
+            // Start game loop
+            gameLoop();
+        });
+    </script>
+</body>
+</html>
